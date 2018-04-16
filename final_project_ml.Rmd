@@ -1,0 +1,95 @@
+---
+title: "Machine_learning"
+author: "CW"
+date: "15/04/2018"
+output: html_document
+---
+In this project, we aim to use data from accelerometers of 6 participants performing barbell lifts correctly and incorrectly in 5 different ways to predict how well they do it. 
+outcome variable: classe
+* Class A - exactly according to the specification
+* Class B - throwing the elbows to the front
+* Class C - lifting the dumbbell only halfway
+* Class D - lowering the dumbbell only halfway
+* Class E - throwing the hips to the front
+
+```{r, hide =T}
+setwd("/Volumes/Daisy/R/R_assignmant/machine_learning/")
+library(caret)
+library(randomForest)
+library(rpart)
+library(rpart.plot)
+```
+
+```{r}
+trainingV <- read.csv("pml-training.csv",head=T)
+testingo <- read.csv("pml-testing.csv",head=T)
+set.seed(1121)
+table(is.na(trainingV))
+```
+There many a lot of missing values, thus we first exclude variables with limited variance in prediction.
+
+# Preprocessing
+```{r, cache = FALSE}
+sum(is.na(trainingV))
+missingN<-matrix()
+
+matName<-names(trainingV)
+for (i in 1:dim(trainingV)[2]) {
+   t<-sum(is.na(trainingV[,i]))
+   missingN <- c(missingN,t)
+}
+
+missingN <- missingN[!is.na(missingN)]
+No.missingVar <- data.frame(missingN, matName)
+validVar<-No.missingVar[No.missingVar$missingN ==0,]
+trainingV2 <- trainingV[names(trainingV) %in% validVar$matName]
+trainingV3 <- trainingV2[,-c(1,2)]
+ 
+varT<-nearZeroVar(trainingV3,saveMetrics = T)
+trainingV4<- trainingV3[,varT$nzv == FALSE]
+ 
+valida_index <- createDataPartition(trainingV4$classe, p =.75, list = FALSE)
+validation <- trainingV4[-valida_index,]
+training <- trainingV4[valida_index,]
+testing <- testingo[,names(testingo) %in% names(training)]
+
+dim(validation)
+dim(training)
+dim(testing)
+```
+
+
+```{r,cache=TRUE,results='hide'}
+modf1 <- train(classe ~., training, method ="rf")
+modf2 <- train (classe ~., training, method ="rpart")
+modf3 <- train (classe ~., training, method ="gbm")
+```
+
+Using three models to train the data
+
+```{r}
+crossV1<- predict(modf1,newdata = validation)
+crossV2<- predict(modf2,newdata = validation)
+crossV3<- predict(modf3,newdata = validation)
+```
+
+```{r}
+confusionMatrix(crossV1,validation$classe)$overall
+confusionMatrix(crossV2,validation$classe)$overall
+confusionMatrix(crossV3,validation$classe)$overall
+```
+
+Confusion Matrix shows that model 1 (random forest, method = "rf") and model 3 (medho = "rpart") accurately predict the validation dataset. We thus will apply the two models to the testing set.
+
+# predicting the testing set
+```{r}
+predict(modf1,newdata=testing)
+predict(modf3,newdata=testing)
+```
+The predictions made by the two models are identical
+
+# Appendix
+```{r}
+plot(modf1$finalModel)
+plot(modf3$finalModel)
+```
