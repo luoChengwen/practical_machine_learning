@@ -26,7 +26,7 @@ testingo <- read.csv("pml-testing.csv",head=T)
 set.seed(1121)
 table(is.na(trainingV))
 ```
-There many a lot of missing values, thus we first exclude variables with limited variance in prediction.
+There are a lot of missing values, thus we first exclude variables with limited variance in prediction.
 
 # Preprocessing
 ```{r, cache = FALSE}
