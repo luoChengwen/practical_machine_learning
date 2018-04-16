@@ -90,7 +90,7 @@ confusionMatrix(crossV2,validation$classe)$overall
 confusionMatrix(crossV3,validation$classe)$overall
 ```
 
-Confusion Matrix shows that model 1 (random forest, method = "rf") and model 3 (medho = "rpart") accurately predict the validation dataset. We thus will apply the two models to the testing set.
+Confusion Matrix shows that model 1 (random forest, method = "rf") and model 3 (medho = "gbm") accurately predict the validation dataset. We thus will apply the two models to the testing set.
 
 Out of sample error rate for model 1 is 1-1.000 = 0, for model 3, out of sample error is 1 - .9973 =.0027.
 
